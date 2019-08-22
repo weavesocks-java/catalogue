@@ -1,15 +1,23 @@
 package com.oracle.coherence.weavesocks.catalogue;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -36,15 +44,16 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class CatalogueResource {
     private static Comparator<Sock> PRICE_COMPARATOR = new ExtractorComparator<>(new UniversalExtractor<Sock, Float>("price"));
     private static Comparator<Sock> NAME_COMPARATOR  = new ExtractorComparator<>(new UniversalExtractor<Sock, String>("name"));
+
     @Inject
     private NamedCache<String, Sock> catalogue;
 
     @GET
     @Produces(APPLICATION_JSON)
     public Collection<Sock> getSocks(@QueryParam("tags") String tags,
-                                     @QueryParam("order") String order,
-                                     @QueryParam("page") int pageNum,
-                                     @QueryParam("size") int pageSize) {
+                                     @QueryParam("order") @DefaultValue("price") String order,
+                                     @QueryParam("page") @DefaultValue("1") int pageNum,
+                                     @QueryParam("size") @DefaultValue("10") int pageSize) {
 
         LimitFilter<Sock> filter = new LimitFilter<>(createTagsFilter(tags), pageSize);
         Comparator<Sock> comparator = "price".equals(order)
@@ -53,7 +62,7 @@ public class CatalogueResource {
                         ? NAME_COMPARATOR
                         : null;
         filter.setComparator(comparator);
-        filter.setPage(pageNum);
+        filter.setPage(pageNum - 1);
 
         return catalogue.values(filter);
     }
@@ -81,5 +90,22 @@ public class CatalogueResource {
             }
         }
         return filter;
+    }
+
+    @PostConstruct
+    public void loadData() {
+        if (catalogue.isEmpty()) {
+            Jsonb jsonb = JsonbBuilder.create();
+            InputStream in = getClass().getClassLoader().getResourceAsStream("data.json");
+
+            List<Sock> socks = jsonb.fromJson(
+              in,
+              new ArrayList<Sock>(){}.getClass().getGenericSuperclass()
+            );
+
+            Map<String, Sock> sockMap = socks.stream()
+                    .collect(Collectors.toMap(Sock::getId, sock -> sock));
+            catalogue.putAll(sockMap);
+        }
     }
 }

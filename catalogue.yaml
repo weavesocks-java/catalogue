@@ -18,7 +18,7 @@ spec:
     - role: carts
       images:
         userArtifacts:
-          image: weavesocks/carts:1.0.0
+          image: weavesocks/catalogue:1.0.0
       cacheConfig: coherence-cache-config.xml
       logging:
         configFile: logging.properties
