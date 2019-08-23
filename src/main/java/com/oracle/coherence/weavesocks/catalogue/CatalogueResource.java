@@ -70,8 +70,8 @@ public class CatalogueResource {
     @GET
     @Path("size")
     @Produces(APPLICATION_JSON)
-    public int getSockCount(@QueryParam("tags") String tags) {
-        return catalogue.aggregate(createTagsFilter(tags), Aggregators.count());
+    public Count getSockCount(@QueryParam("tags") String tags) {
+        return new Count(catalogue.aggregate(createTagsFilter(tags), Aggregators.count()));
     }
 
     @GET
@@ -83,11 +83,9 @@ public class CatalogueResource {
 
     private Filter<Sock> createTagsFilter(String tags) {
         Filter<Sock> filter = AlwaysFilter.INSTANCE();
-        if (tags != null) {
+        if (tags != null && !"".equals(tags)) {
             String[] aTags = tags.split(",");
-            if (aTags.length > 0) {
-                filter = Filters.containsAny(Sock::getTag, aTags);
-            }
+            filter = Filters.containsAny(Sock::getTag, aTags);
         }
         return filter;
     }
@@ -106,6 +104,15 @@ public class CatalogueResource {
             Map<String, Sock> sockMap = socks.stream()
                     .collect(Collectors.toMap(Sock::getId, sock -> sock));
             catalogue.putAll(sockMap);
+        }
+    }
+
+    public static class Count {
+        public int size;
+        public Object err;
+
+        public Count(int size) {
+            this.size = size;
         }
     }
 }

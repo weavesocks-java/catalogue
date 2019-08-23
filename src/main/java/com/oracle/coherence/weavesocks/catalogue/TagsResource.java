@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.JsonValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -24,12 +25,23 @@ public class TagsResource {
     private NamedCache<String, Sock> catalogue;
 
     @GET
-    public Set<String> getTags() {
+    public Tags getTags() {
         ValueExtractor<Sock, Set<String>> extractor = Sock::getTag;
 
-        return catalogue.stream()
+        Set<String> tags = catalogue.stream()
                 .map(entry -> entry.extract(extractor))
                 .flatMap(Collection::stream)
                 .collect(RemoteCollectors.toSet());
+
+        return new Tags(tags);
+    }
+
+    public static class Tags {
+        public Set<String> tags;
+        public Object err;
+
+        Tags(Set<String> tags) {
+            this.tags = tags;
+        }
     }
 }

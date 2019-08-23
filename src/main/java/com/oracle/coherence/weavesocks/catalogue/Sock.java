@@ -5,29 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-/*
-type Sock struct {
-	ID          string   `json:"id" db:"id"`
-	Name        string   `json:"name" db:"name"`
-	Description string   `json:"description" db:"description"`
-	ImageURL    []string `json:"imageUrl" db:"-"`
-	ImageURL_1  string   `json:"-" db:"image_url_1"`
-	ImageURL_2  string   `json:"-" db:"image_url_2"`
-	Price       float32  `json:"price" db:"price"`
-	Count       int      `json:"count" db:"count"`
-	Tags        []string `json:"tag" db:"-"`
-	TagString   string   `json:"-" db:"tag_name"`
-}
-
- */
 public class Sock implements Serializable {
-    public String id;
-    public String name;
-    public String description;
-    public List<String> imageUrl;
-    public float price;
-    public int count;
-    public Set<String> tag;
+    private String id;
+    private String name;
+    private String description;
+    private List<String> imageUrl;
+    private float price;
+    private int count;
+    private Set<String> tag;
 
     public Sock() {
     }
