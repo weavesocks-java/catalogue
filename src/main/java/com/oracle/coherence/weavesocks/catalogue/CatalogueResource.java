@@ -19,10 +19,12 @@ import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.tangosol.net.NamedCache;
@@ -88,6 +90,17 @@ public class CatalogueResource {
             filter = Filters.containsAny(Sock::getTag, aTags);
         }
         return filter;
+    }
+
+    @GET
+    @Path("images/{image}")
+    @Produces("image/jpeg")
+    public Response getImage(@PathParam("image") String image) {
+        InputStream img = getClass().getClassLoader().getResourceAsStream("web/images/" + image);
+        if (img == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(img).build();
     }
 
     @PostConstruct
