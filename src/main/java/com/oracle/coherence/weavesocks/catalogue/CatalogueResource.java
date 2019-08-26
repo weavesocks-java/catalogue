@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,10 @@ public class CatalogueResource {
                 : "name".equals(order)
                         ? NAME_COMPARATOR
                         : null;
-        filter.setComparator(comparator);
+
         filter.setPage(pageNum - 1);
 
-        return catalogue.values(filter);
+        return catalogue.values(filter, comparator);
     }
 
     @GET
